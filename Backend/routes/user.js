@@ -104,14 +104,7 @@ router.put("/", authMiddleware, async (req, res) => {
     });
   }
 
-  console.log(req.userId);
-  console.log(req.body);
-  await User.updateOne(
-    {
-      _id: req.userId,
-    },
-    req.body
-  );
+  await User.updateOne({ _id: req.userId }, req.body);
 
   res.json({
     message: "Updated successfully",
