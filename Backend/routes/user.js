@@ -8,7 +8,7 @@ const { authMiddleware } = require("../middleware");
 const router = express.Router();
 
 const signupBody = zod.object({
-  username: zod.string.email(),
+  username: zod.string().email(),
   firstName: zod.string(),
   lastName: zod.string(),
   password: zod.string(),
@@ -61,11 +61,11 @@ router.post("/signup", async (req, res) => {
 });
 
 const signinBody = zod.object({
-  username: zod.string.email(),
+  username: zod.string().email(),
   password: zod.string(),
 });
 
-router.post("/siginin", async (req, res) => {
+router.post("/signin", async (req, res) => {
   const { success } = signinBody.safeParse(req.body);
   if (!success) {
     return res.status(411).json({
@@ -74,8 +74,8 @@ router.post("/siginin", async (req, res) => {
   }
 
   const user = await User.findOne({
-    username: req.body.username(),
-    password: req.body.password(),
+    username: req.body.username,
+    password: req.body.password,
   });
 
   if (user) {
@@ -91,8 +91,8 @@ router.post("/siginin", async (req, res) => {
 
 const updateBody = zod.object({
   password: zod.string().optional(),
-  firstName: zod.string.optional(),
-  lastName: zod.string.optional(),
+  firstName: zod.string().optional(),
+  lastName: zod.string().optional(),
 });
 
 router.put("/", authMiddleware, async (req, res) => {
@@ -104,9 +104,14 @@ router.put("/", authMiddleware, async (req, res) => {
     });
   }
 
-  await User.updateOne(req.body, {
-    id: req.userId,
-  });
+  console.log(req.userId);
+  console.log(req.body);
+  await User.updateOne(
+    {
+      _id: req.userId,
+    },
+    req.body
+  );
 
   res.json({
     message: "Updated successfully",
@@ -116,6 +121,7 @@ router.put("/", authMiddleware, async (req, res) => {
 router.get("/bulk", async (req, res) => {
   const filter = req.query.filter || "";
 
+  console.log(filter);
   const users = await User.find({
     $or: [
       {
